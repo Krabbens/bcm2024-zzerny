@@ -1,9 +1,9 @@
 class Vehicle:
 
-    def __init__(self, vehicle_type, charge, location, brand, range = None):
+    def __init__(self, vehicle_type, charge, lat, lon, brand, range = None):
         self.vehicle_type = vehicle_type
         self.charge = charge
-        self.location = location
+        self.location = (lat, lon)
         self.brand = brand
         if range != None:
             self.range = range
