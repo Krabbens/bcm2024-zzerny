@@ -79,6 +79,3 @@ def polyline_encode_unsigned(value: int, array: List[str]) -> List[str]:
 
 def round_number(v: float) -> int:
     return int(abs(v) + 0.5) * (1 if v >= 0 else -1)
-
-
-print(decode("cbujIiuxpB?_@Q??^P?"))
