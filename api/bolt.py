@@ -2,6 +2,8 @@ import requests
 import json
 from vehicle import *
 
+default_location = (54.372158, 18.638306)
+
 class Bolt:
     def __init__(self):
         self.url = "https://user.live.boltsvc.net/micromobility/search/getVehicles/v2?language=en&version=CA.97.1&deviceId=8c3e8f25-e1d7-4ea8-81c6-cf80d58eb1f7&device_name=XiaomiM2101K9AG&device_os_version=12&channel=googleplay&deviceType=android&"
@@ -14,11 +16,11 @@ class Bolt:
             "Authorization": "Basic KzQ4NjY3ODIyODI0OjVkMGQ0YTZmLTkxNTktNGFiNC05NDAyLWMzMzkwY2NmNmI2NA=="
         }
 
-    def get_scooters(self, lat, lon):
+    def get_scooters(self, lat = default_location[0], lon = default_location[1]):
         response = requests.post(self.url + "gps_lat=" + str(lat) + "&gps_lng=" + str(lon), headers=self.headers)
         return response.json()
     
-    def get_vehicles(self, init_lat, init_lon):
+    def get_vehicles(self, init_lat = default_location[0], init_lon = default_location[1]):
         json_obj = self.get_scooters(init_lat, init_lon)
         all_vehicles = []
         categories = json_obj.get("data", {}).get("categories", [])

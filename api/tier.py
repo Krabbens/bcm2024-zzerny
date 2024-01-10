@@ -1,6 +1,7 @@
 import requests
 from vehicle import *
 
+default_location = (54.372158, 18.638306)
 default_radius = 1370
 
 class Tier:
@@ -13,23 +14,24 @@ class Tier:
             "Host": "platform.tier-services.io",
         }
 
-    def get_scooters(self, lat, lon, radius):
+    def get_scooters(self, lat = default_location[0], lon = default_location[1], radius = default_radius):
         response = requests.get(self.url + "&lat=" + str(lat) + "&lng=" + str(lon) + "&radius=" + str(radius), headers=self.headers)
         return response.json()
     
-    def get_vehicles(self, init_lat, init_lon):
+    def get_vehicles(self, init_lat = default_location[0], init_lon = default_location[1]):
         json_obj = self.get_scooters(init_lat, init_lon, default_radius)
         all_vehicles = []
         data = json_obj.get("data", {})
         for row in data:
             if row.get("type", "") == "vehicle":
                 vehicle_data = row.get("attributes", {})
-                lat = vehicle_data.get("lat", 0)
-                lon = vehicle_data.get("lng", 0)
-                charge = vehicle_data.get("batteryLevel", 0)
-                range = vehicle_data.get("currentRangeMeters", 0)
+                if vehicle_data.get("isRentable", True):
+                    lat = vehicle_data.get("lat", 0)
+                    lon = vehicle_data.get("lng", 0)
+                    charge = vehicle_data.get("batteryLevel", 0)
+                    range = vehicle_data.get("currentRangeMeters", 0)
 
-                vehicle = Vehicle(vehicle_type='scooter', charge=charge, lat=lat, lon=lon, brand='tier', range=range)
-                all_vehicles.append(vehicle)
+                    vehicle = Vehicle(vehicle_type='scooter', charge=charge, lat=lat, lon=lon, brand='tier', range=range)
+                    all_vehicles.append(vehicle)
 
         return all_vehicles
