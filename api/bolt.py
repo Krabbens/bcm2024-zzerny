@@ -28,7 +28,7 @@ class Bolt:
     
     def get_zones(self):
         response = requests.get(self.zones_url, headers=self.zones_headers)
-        return response.content
+        return json.dumps(response.json(), indent=2)
 
     def get_scooters(self, lat = default_location[0], lon = default_location[1]):
         response = requests.post(self.scooters_url + "gps_lat=" + str(lat) + "&gps_lng=" + str(lon), headers=self.scooters_headers)
