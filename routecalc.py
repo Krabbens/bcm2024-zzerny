@@ -3,10 +3,14 @@ from station import *
 from api import *
 from math import radians, sin, cos, sqrt, atan2
 import time
+from cache import *
 
 
 class RouteCalc():
     def __init__(self):
+        self.init_lat = 54.362043421305046
+        self.init_lon = 18.628451433496945
+
         self.mevo_vehicles = []
         self.bolt_vehicles = []
         self.tier_vehicles = []
@@ -49,18 +53,31 @@ class RouteCalc():
 
 
     
-    def get_data(self):
+    def get_data(self, cache):
+        if (cache.check_update()):
+            self.mevo_vehicles = Mevo().get_vehicles()
+            self.bolt_vehicles = Bolt().get_vehicles(init_lat = self.init_lat, init_lon = self.init_lon)   
+            self.tier_vehicles = Tier().get_vehicles(init_lat = self.init_lat, init_lon = self.init_lon)
 
-        self.mevo_vehicles = Mevo().get_vehicles()
-        self.bolt_vehicles = Bolt().get_vehicles(init_lat = 54.362043421305046, init_lon = 18.628451433496945)   
-        self.tier_vehicles = Tier().get_vehicles(init_lat = 54.362043421305046, init_lon = 18.628451433496945)
+            self.mevo_stations = Mevo().get_stations()
+            self.tier_bolt_stations = [] #Tier().get_stations() + Bolt().get_stations()
 
-        self.mevo_stations = Mevo().get_stations()
-        self.tier_bolt_stations = [] #Tier().get_stations() + Bolt().get_stations()
+            cache.update({
+                'mevo_vehicles' : self.mevo_vehicles,
+                'bolt_vehicles' : self.bolt_vehicles,
+                'tier_vehicles' : self.tier_vehicles,
+                'mevo_stations' : self.mevo_stations,
+                'tier_bolt_stations' : self.tier_bolt_stations
+            })
+        else:
+            self.mevo_vehicles = cache.route_data['mevo_vehicles']
+            self.bolt_vehicles = cache.route_data['bolt_vehicles']
+            self.tier_vehicles = cache.route_data['tier_vehicles']
+            self.mevo_stations = cache.route_data['mevo_stations']
+            self.tier_bolt_stations = cache.route_data['tier_bolt_stations']
 
 
     def get_distances(self, vehicles, stations, location1, location2):
-
         distances = []
         distances2 = []
 
@@ -86,7 +103,6 @@ class RouteCalc():
     
 
     def get_route_info(self, type, point1, point2):
-        
         if (type == 'mevo'):
             vehicles = self.mevo_vehicles
             stations = self.mevo_stations
