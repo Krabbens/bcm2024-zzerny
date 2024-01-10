@@ -16,7 +16,11 @@ class RouteCalc():
         self.tier_vehicles = []
 
         self.mevo_stations = []
-        self.tier_bolt_stations = []
+        self.bolt_stations = []
+        self.tier_stations = []
+
+        self.bolt_zones = []
+        self.tier_zones = []
 
         self.start_time = time.time()
 
@@ -52,29 +56,60 @@ class RouteCalc():
         return distance
 
 
-    
-    def get_data(self, cache):
-        if (cache.check_update()):
+    def get_data_route(self, cache):
+        if (cache.check_update_route()):
             self.mevo_vehicles = Mevo().get_vehicles()
             self.bolt_vehicles = Bolt().get_vehicles(init_lat = self.init_lat, init_lon = self.init_lon)   
             self.tier_vehicles = Tier().get_vehicles(init_lat = self.init_lat, init_lon = self.init_lon)
 
             self.mevo_stations = Mevo().get_stations()
-            self.tier_bolt_stations = [] #Tier().get_stations() + Bolt().get_stations()
+            self.bolt_stations = [] #Tier().get_stations() + Bolt().get_stations()
+            self.tier_stations = []
 
-            cache.update({
+            cache.update_route({
                 'mevo_vehicles' : self.mevo_vehicles,
                 'bolt_vehicles' : self.bolt_vehicles,
                 'tier_vehicles' : self.tier_vehicles,
                 'mevo_stations' : self.mevo_stations,
-                'tier_bolt_stations' : self.tier_bolt_stations
+                'bolt_stations' : self.bolt_stations,
+                'tier_stations' : self.tier_stations
             })
         else:
             self.mevo_vehicles = cache.route_data['mevo_vehicles']
             self.bolt_vehicles = cache.route_data['bolt_vehicles']
             self.tier_vehicles = cache.route_data['tier_vehicles']
             self.mevo_stations = cache.route_data['mevo_stations']
-            self.tier_bolt_stations = cache.route_data['tier_bolt_stations']
+            self.bolt_stations = cache.route_data['bolt_stations']
+            self.tier_stations = cache.route_data['tier_stations']
+
+
+    def get_data_zone(self, cache):
+        if (cache.check_update_zone()):
+            self.bolt_zones = Bolt().get_zones()
+            self.tier_zones = [] #Tier().get_zones()
+
+            cache.update_zone({
+                'bolt_zones' : self.bolt_zones,
+                'tier_zones' : self.tier_zones
+            })
+        else:
+            self.bolt_zones = cache.zone_data['bolt_zones']
+            self.tier_zones = cache.zone_data['tier_zones']
+    
+
+    def get_data(self, cache):
+        self.get_data_route(cache)
+
+        self.get_data_zone(cache)
+
+    
+    def check_which_zone(self, location):
+
+
+        for zone in self.bolt_zones:
+            if zone.is_inside(location):
+                print(zone.type, zone.geometry)
+
 
 
     def get_distances(self, vehicles, stations, location1, location2):
