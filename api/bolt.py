@@ -12,6 +12,6 @@ class Bolt:
             "Authorization": "Basic KzQ4NjY3ODIyODI0OjVkMGQ0YTZmLTkxNTktNGFiNC05NDAyLWMzMzkwY2NmNmI2NA=="
         }
 
-    def get_scooters(self):
-        response = requests.post(self.url, headers=self.headers)
+    def get_scooters(self, lat, lng):
+        response = requests.post(self.url + "gps_lat=" + str(lat) + "&gps_lng=" + str(lng), headers=self.headers)
         return response.json()
