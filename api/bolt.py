@@ -2,6 +2,7 @@ import requests
 import json
 from vehicle import *
 from zone import *
+from api.polyline import decode
 
 default_location = (54.372158, 18.638306)
 
@@ -39,7 +40,7 @@ class Bolt:
         areas = data["areas"]["added"]
         for a in areas:
             type = area_groups[a["group_id"]]["style_id"]
-            zone = Zone(type=type,lat=0,lon=0,brand='bolt', geometry=None)
+            zone = Zone(type=type,lat=0,lon=0,brand='bolt', geometry=decode(a["polygon"]["locations"]))
             all_zones.append(zone)
         return all_zones
 
