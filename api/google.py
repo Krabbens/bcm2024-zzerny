@@ -9,8 +9,8 @@ class Google:
         self.url = "https://user.live.boltsvc.net/micromobility/search/getVehicles/v2?language=en&version=CA.97.1&deviceId=8c3e8f25-e1d7-4ea8-81c6-cf80d58eb1f7&device_name=XiaomiM2101K9AG&device_os_version=12&channel=googleplay&deviceType=android&"
 
 
-    def get_distances(waypointsPairs):
-        waypoints = [point for pair in waypointsPairs for point in pair]
+    def get_distances(self, waypoints_pairs):
+        waypoints = [point for pair in waypoints_pairs for point in pair]
 
         base_url = "https://maps.googleapis.com/maps/api/directions/json"
 
