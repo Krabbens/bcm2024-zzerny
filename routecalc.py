@@ -3,7 +3,7 @@ from station import *
 from api import *
 from math import radians, sin, cos, sqrt, atan2
 import time
-from cache import *
+import google
 
 
 class RouteCalc():
@@ -102,6 +102,32 @@ class RouteCalc():
         return distances, distances2
     
 
+    def validate_with_google(self, distances1, distances2, v_n, s_n):
+        vehicle = []
+        for i in range(v_n):
+            vehicle.append(distances1[i][0])
+
+        station = []
+        for i in range(s_n):
+            station.append(distances2[i][0])
+
+        pairs = []
+        for i in range(v_n):
+            for j in range(s_n):
+                pairs.append((vehicle[i], station[j]))
+
+        google = Google()
+        g_distances = google.get_distances(pairs)
+
+        dist_pairs = []
+        for i in range(len(g_distances)):
+            dist_pairs.append([pairs[i], g_distances[i]])
+        
+        dist_pairs.sort(key=lambda x: x[1])
+
+        return (dist_pairs[0][0])
+    
+
     def get_route_info(self, type, point1, point2):
         if (type == 'mevo'):
             vehicles = self.mevo_vehicles
@@ -118,7 +144,9 @@ class RouteCalc():
         distances1.sort(key=lambda x: x[1])
         distances2.sort(key=lambda x: x[1])
 
-        vehicle = distances1[0][0]
-        station = distances2[0][0]
+        v_n = 3
+        s_n = 3
 
-        return (vehicle, station)
+        best = self.validate_with_google(distances1, distances2, v_n, s_n)
+
+        return best
