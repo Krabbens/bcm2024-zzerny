@@ -1,5 +1,5 @@
 import requests
-from vehicle import *
+
 
 default_location = (54.372158, 18.638306)
 default_radius = 1370
@@ -7,6 +7,7 @@ default_radius = 1370
 class Tier:
     def __init__(self):
         self.url = "https://platform.tier-services.io/v2/vehicle?type%5B%5D=escooter&type%5B%5D=ebicycle"
+        self.zones_url = "https://platform.tier-services.io/v1/zone/geo-rules?"
         self.headers = {
             "User-Agent": "TIER/4.0.127 (Android/12)",
             "Customer-Agent": "Tier Android",
@@ -35,3 +36,11 @@ class Tier:
                     all_vehicles.append(vehicle)
 
         return all_vehicles
+
+
+    def get_zones(self, lat, lon):
+        response = requests.get(self.zones_url + "lat=" + str(lat) + "&lng=" + str(lon) + "&radius=100000", headers=self.headers)
+        return response.json()
+
+tier = Tier()
+print(tier.get_zones(54.372158, 18.638306))
