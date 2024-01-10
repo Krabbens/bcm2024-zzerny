@@ -47,5 +47,13 @@ class Tier:
     def get_vec(self, root_zone):
         uri = self.geo_url + root_zone + "/geometry"
         response = requests.get(uri, headers=self.headers)
-        return response.json()
+        data = response.json()
+        new_geo = []
+        for geo in data["data"]["features"]:
+            poly = []
+            for point in geo["geometry"]["coordinates"][0]:
+                poly.append({"lat": point[1], "lng": point[0]})
+            new_geo.append({"type": geo["properties"], "coordinates": poly})
+
+        return new_geo
 
