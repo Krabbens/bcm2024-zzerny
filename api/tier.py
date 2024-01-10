@@ -1,5 +1,5 @@
 import requests
-from vehicle import *
+
 
 default_location = (54.372158, 18.638306)
 default_radius = 1370
@@ -39,5 +39,8 @@ class Tier:
 
 
     def get_zones(self, lat, lon):
-        response = requests.get(self.url + "lat=" + str(lat) + "&lng=" + str(lon) + "&radius=100000", headers=self.headers)
+        response = requests.get(self.zones_url + "lat=" + str(lat) + "&lng=" + str(lon) + "&radius=100000", headers=self.headers)
         return response.json()
+
+tier = Tier()
+print(tier.get_zones(54.372158, 18.638306))
