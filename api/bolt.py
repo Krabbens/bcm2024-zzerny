@@ -37,3 +37,5 @@ class Bolt:
         return all_vehicles
 
     
+bolt = Bolt()
+print(bolt.get_scooters(54.354711, 18.591989))
