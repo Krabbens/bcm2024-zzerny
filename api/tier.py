@@ -24,12 +24,12 @@ class Tier:
         for row in data:
             if row.get("type", "") == "vehicle":
                 vehicle_data = row.get("attributes", {})
-                lat = row.get("lat", 0)
-                lon = row.get("lon", 0)
-                charge = row.get("batteryLevel", 0)
-                range = row.get("currentRangeMeters", 0)
+                lat = vehicle_data.get("lat", 0)
+                lon = vehicle_data.get("lng", 0)
+                charge = vehicle_data.get("batteryLevel", 0)
+                range = vehicle_data.get("currentRangeMeters", 0)
 
-                vehicle = Vehicle(vehicle_type='scooter', charge=charge, lat=lat, lon=lon, brand='bolt', range=range)
+                vehicle = Vehicle(vehicle_type='scooter', charge=charge, lat=lat, lon=lon, brand='tier', range=range)
                 all_vehicles.append(vehicle)
 
         return all_vehicles
