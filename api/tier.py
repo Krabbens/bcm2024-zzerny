@@ -9,6 +9,7 @@ class Tier:
     def __init__(self):
         self.url = "https://platform.tier-services.io/v2/vehicle?type%5B%5D=escooter&type%5B%5D=ebicycle"
         self.zones_url = "https://platform.tier-services.io/v1/zone/geo-rules?"
+        self.geo_url = "https://platform.tier-services.io/v2/zone/root/"
         self.headers = {
             "User-Agent": "TIER/4.0.127 (Android/12)",
             "Customer-Agent": "Tier Android",
@@ -42,3 +43,9 @@ class Tier:
     def get_zones(self, lat = default_location[0], lon = default_location[1]):
         response = requests.get(self.zones_url + "lat=" + str(lat) + "&lng=" + str(lon) + "&radius=100000", headers=self.headers)
         return response.json()
+    
+    def get_vec(self, root_zone):
+        uri = self.geo_url + root_zone + "/geometry"
+        response = requests.get(uri, headers=self.headers)
+        return response.json()
+
