@@ -14,28 +14,23 @@ class Bolt:
             "Authorization": "Basic KzQ4NjY3ODIyODI0OjVkMGQ0YTZmLTkxNTktNGFiNC05NDAyLWMzMzkwY2NmNmI2NA=="
         }
 
-    def get_scooters(self, lat, lng):
-        response = requests.post(self.url + "gps_lat=" + str(lat) + "&gps_lng=" + str(lng), headers=self.headers)
+    def get_scooters(self, lat, lon):
+        response = requests.post(self.url + "gps_lat=" + str(lat) + "&gps_lng=" + str(lon), headers=self.headers)
         return response.json()
     
-    def get_vehicles(self):
-        json_obj = self.get_scooters(54.372158, 18.638306)
+    def get_vehicles(self, init_lat, init_lon):
+        json_obj = self.get_scooters(init_lat, init_lon)
         all_vehicles = []
         categories = json_obj.get("data", {}).get("categories", [])
         for category in categories:
             markers_on_map = category.get("markers_on_map", [])
             for marker in markers_on_map:
                 vehicle_data = marker.get("vehicle", {})
-                vehicle_id = vehicle_data.get("id", "")
-                vehicle_type = vehicle_data.get("vehicle_type", "")
                 charge = vehicle_data.get("charge", 0)
                 location = vehicle_data.get("location", {})
-
-                # Tworzenie obiektu Vehicle i dodawanie do listy
-                vehicle = Vehicle(vehicle_type = vehicle_type, charge = charge, location = location, brand = 'bolt')
-                all_vehicles.append(vehicle)
+                lat = location.get("lat", None)
+                lon = location.get("lng", None)
+                if lat is not None and lon is not None:
+                    vehicle = Vehicle(vehicle_type='scooter', charge=charge, lat=lat, lon=lon, brand='bolt')
+                    all_vehicles.append(vehicle)
         return all_vehicles
-
-    
-bolt = Bolt()
-print(bolt.get_scooters(54.354711, 18.591989))
