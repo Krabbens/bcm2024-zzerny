@@ -1,6 +1,7 @@
 import requests
 import json
 from vehicle import *
+from zone import *
 
 default_location = (54.372158, 18.638306)
 
@@ -26,9 +27,21 @@ class Bolt:
             "Authorization": "Basic KzQ4NjY3ODIyODI0OjVkMGQ0YTZmLTkxNTktNGFiNC05NDAyLWMzMzkwY2NmNmI2NA=="
         }
     
-    def get_zones(self):
+    def get_zones_json(self):
         response = requests.get(self.zones_url, headers=self.zones_headers)
-        return json.dumps(response.json(), indent=2)
+        return response.json()
+    
+    def get_zones(self):
+        json_obj = self.get_zones_json()
+        all_zones = []
+        data = json_obj["data"]
+        area_groups = data["area_groups_by_ids"]
+        areas = data["areas"]["added"]
+        for a in areas:
+            type = area_groups[a["group_id"]]["style_id"]
+            zone = Zone(type=type,lat=0,lon=0,brand='bolt', geometry=None)
+            all_zones.append(zone)
+        return all_zones
 
     def get_scooters(self, lat = default_location[0], lon = default_location[1]):
         response = requests.post(self.scooters_url + "gps_lat=" + str(lat) + "&gps_lng=" + str(lon), headers=self.scooters_headers)
