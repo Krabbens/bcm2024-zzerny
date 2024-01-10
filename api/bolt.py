@@ -1,9 +1,10 @@
 import requests
 import json
+from vehicle import *
 
 class Bolt:
     def __init__(self):
-        self.url = "https://user.live.boltsvc.net/micromobility/search/getVehicles/v2?language=en&version=CA.97.1&deviceId=8c3e8f25-e1d7-4ea8-81c6-cf80d58eb1f7&device_name=XiaomiM2101K9AG&device_os_version=12&channel=googleplay&deviceType=android&gps_lat=54.354711&gps_lng=18.591989"
+        self.url = "https://user.live.boltsvc.net/micromobility/search/getVehicles/v2?language=en&version=CA.97.1&deviceId=8c3e8f25-e1d7-4ea8-81c6-cf80d58eb1f7&device_name=XiaomiM2101K9AG&device_os_version=12&channel=googleplay&deviceType=android&"
 
         self.headers = {
             "User-Agent": "okhttp/4.11.0",
@@ -17,16 +18,22 @@ class Bolt:
         response = requests.post(self.url + "gps_lat=" + str(lat) + "&gps_lng=" + str(lng), headers=self.headers)
         return response.json()
     
-    def get_locations(self):
-        json_obj = self.get_scooters()
+    def get_vehicles(self):
+        json_obj = self.get_scooters(54.372158, 18.638306)
         all_vehicles = []
         categories = json_obj.get("data", {}).get("categories", [])
         for category in categories:
             markers_on_map = category.get("markers_on_map", [])
             for marker in markers_on_map:
-                vehicle = marker.get("vehicle", {})
-                all_vehicles.append(vehicle)
+                vehicle_data = marker.get("vehicle", {})
+                vehicle_id = vehicle_data.get("id", "")
+                vehicle_type = vehicle_data.get("vehicle_type", "")
+                charge = vehicle_data.get("charge", 0)
+                location = vehicle_data.get("location", {})
 
-        # Wyświetlanie wyników
-        for vehicle in all_vehicles:
-            print(vehicle)
+                # Tworzenie obiektu Vehicle i dodawanie do listy
+                vehicle = Vehicle(vehicle_type = vehicle_type, charge = charge, location = location, brand = 'bolt')
+                all_vehicles.append(vehicle)
+        return all_vehicles
+
+    
