@@ -1,4 +1,5 @@
 import requests
+import json
 
 class Bolt:
     def __init__(self):
@@ -15,3 +16,17 @@ class Bolt:
     def get_scooters(self):
         response = requests.post(self.url, headers=self.headers)
         return response.json()
+    
+    def get_locations(self):
+        json_obj = self.get_scooters()
+        all_vehicles = []
+        categories = json_obj.get("data", {}).get("categories", [])
+        for category in categories:
+            markers_on_map = category.get("markers_on_map", [])
+            for marker in markers_on_map:
+                vehicle = marker.get("vehicle", {})
+                all_vehicles.append(vehicle)
+
+        # Wyświetlanie wyników
+        for vehicle in all_vehicles:
+            print(vehicle)
