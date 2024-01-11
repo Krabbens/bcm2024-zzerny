@@ -41,6 +41,21 @@ def get_route():
                         }
                     })
 
+@app.zones('/getzones', methods=['GET'])
+def get_zones(brand="tier"):
+    zones = router.get_data_zone(cache)
+
+    if brand == "tier":
+        zones_to_return = zones["tier_zones"]
+    elif brand == "bolt":
+        zones_to_return = zones["bolt_zones"]
+    else:
+        zones_to_return = zones["tier_zones"]
+        zones_to_return.extend(zones["bolt_zones"])
+
+    zones_json = [z.getJson() for z in zones_to_return]
+    return zones_json
+
 
 if __name__ == '__main__':
     app.run(debug=True)
