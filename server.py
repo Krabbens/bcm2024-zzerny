@@ -1,18 +1,18 @@
 from flask import Flask, jsonify, request
+from flask_cors import CORS
 from routecalc import *
 from cache import *
 
 
 app = Flask(__name__)
+CORS(app)
 
 cache = None
 router = None
 google = None
 
 
-@app.before_first_request
-def before_first_request():
-    global cache, router, google
+with app.app_context():
     cache = Cache()
     router = RouteCalc()
     google = Google()
@@ -47,7 +47,7 @@ def get_route():
                         }
                     })
 
-@app.route('/getzones/<brand>', methods=['GET'])
+@app.route('/getzones/<brand>/<brand>', methods=['GET'])
 def get_zones(brand="tier"):
     zones = router.get_data_zone(cache)
 
@@ -56,8 +56,7 @@ def get_zones(brand="tier"):
     elif brand == "bolt":
         zones_to_return = zones["bolt_zones"]
     else:
-        zones_to_return = zones["tier_zones"]
-        zones_to_return.extend(zones["bolt_zones"])
+        return jsonify({'error': 'Brand not found'}), 400
 
     zones_json = [z.getJson() for z in zones_to_return]
     return zones_json
@@ -90,4 +89,4 @@ def bulk_geocodes():
     return jsonify(geocodes)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0', port=6000)
