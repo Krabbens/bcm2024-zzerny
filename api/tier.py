@@ -4,7 +4,7 @@ from zone import *
 
 
 default_location = (54.372158, 18.638306)
-default_radius = 1370
+default_radius = 7000
 
 class Tier:
     def __init__(self):
