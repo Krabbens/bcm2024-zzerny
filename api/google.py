@@ -31,7 +31,8 @@ class Google:
             "origin": origin,
             "destination": destination,
             "waypoints": "|".join(waypoints),
-            "key": api_key
+            "key": api_key,
+            "travelMode": "bicycle"
         }
 
         response = requests.get(base_url, params=params)
@@ -65,3 +66,33 @@ class Google:
         else:
             print(f"Error: {data['status']}")
             return None
+        
+    def get_whole_route(self, waypoints):
+        base_url = "https://maps.googleapis.com/maps/api/directions/json"
+
+        if len(waypoints) >= 2:
+            origin = waypoints[0]
+            destination = waypoints[-1]
+            del waypoints[0]
+            del waypoints[-1]
+        else:
+            print("Error: list of waypoints is too short")
+            return
+        
+        origin = f"{origin[0]},{origin[1]}"
+        destination = f"{destination[0]},{destination[1]}"
+        waypoints = ["{0},{1}".format(lat, lon) for lat, lon in waypoints]
+
+        params = {
+            "origin": origin,
+            "destination": destination,
+            "waypoints": "|".join(waypoints),
+            "key": api_key,
+            "travelMode": "bicycle"
+        }
+
+        response = requests.get(base_url, params=params)
+        data = response.json()
+       
+
+        return data["routes"][0]["overview_polyline"]["points"]
