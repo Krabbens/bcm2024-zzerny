@@ -4,7 +4,8 @@ from api import *
 from math import radians, sin, cos, sqrt, atan2
 import time
 import google
-
+from geopy.distance import geodesic
+from operator import itemgetter
 
 class RouteCalc():
     def __init__(self):
@@ -98,18 +99,85 @@ class RouteCalc():
     
 
     def get_data(self, cache):
-        self.get_data_route(cache)
+        self.snapshot_time()
 
+        self.get_data_route(cache)
         self.get_data_zone(cache)
 
+        self.snapshot_time()
+
+        point = (54.39898936039211, 18.602469614969234)
+        end_point = (54.40228442462209, 18.59120754980892)
+        point = self.nearest_suitable_point(point, self.bolt_zones, end_point)
+        print(point)
+
+        self.snapshot_time()
+
+
+    def nearest_suitable_point(self, location, zones, end_point):
+        my_zones = self.check_which_zone(location, zones)
+
+        for zone in my_zones:
+            print(zone)
+
+        #select a zone that has a type "no_parking" or "no_go_zone"
+        the_zone = self.get_an_illegal_zone(my_zones)
+        print(the_zone)
+
+
+        movement_matrix = [(1, 0), (0.707, 0.707), (0, 1), (-0.707, 0.707), (-1, 0), (-0.707, -0.707), (0, -1), (0.707, -0.707)]
+        for n in range(len(movement_matrix)):
+            movement_matrix[n] = (movement_matrix[n][0] * 0.0005, movement_matrix[n][1] * 0.0005)
+        rays = [location, location, location, location, location, location, location, location]
+        zone_to_check = [the_zone, the_zone, the_zone, the_zone, the_zone, the_zone, the_zone, the_zone]
+
+        steps = 400
+
+        good_points = []
+
+        for _ in range(steps):
+            for n in range(len(rays)):
+                if (movement_matrix[n][0] == 0):
+                        continue
+
+                rays[n] = (rays[n][0] + movement_matrix[n][0], rays[n][1] + movement_matrix[n][1])
+
+                still_in_zone = zone_to_check[n].is_inside(rays[n])
+
+                if (still_in_zone == False):
+                    my_zones = self.check_which_zone(rays[n], zones)
+                    
+                    illegal_zone = self.get_an_illegal_zone(my_zones)
+                    if (illegal_zone == None):
+                        good_points.append(rays[n])
+                        movement_matrix[n] = (0, 0)
+                    else:
+                        zone_to_check[n] = illegal_zone
+
+        distancesx = []
+        for point in good_points:
+            distancesx.append([point, self.haversine_distance(point, end_point)])
+        sortedx = sorted(distancesx, key=itemgetter(1))
+        
+        return sortedx[0][0]
+
+
+    def get_an_illegal_zone(self, zones):
+        for zone in zones:
+            if zone.type == "no_parking" or zone.type == "no_go_zone":
+                return zone
+            
+        return None
+
     
-    def check_which_zone(self, location):
+    def check_which_zone(self, location, zones):
+        in_zones = []
 
-
-        for zone in self.bolt_zones:
+        for zone in zones:
             if zone.is_inside(location):
-                print(zone.type, zone.geometry)
+                in_zones.append(zone)
 
+        return in_zones
 
 
     def get_distances(self, vehicles, stations, location1, location2):
