@@ -61,6 +61,26 @@ def get_zones(brand="tier"):
     zones_json = [z.getJson() for z in zones_to_return]
     return zones_json
 
+
+@app.route('/getvehicles/<brand>', methods=['GET'])
+def get_vehicles(brand="mevo"):
+    router.get_data_route(cache)
+
+    if brand == "mevo":
+        vehicles = router.mevo_vehicles
+    elif brand == "tier":
+        vehicles = router.tier_vehicles
+    elif brand == "bolt":
+        vehicles = router.bolt_vehicles
+    else:
+        return jsonify({'error': 'Brand not found'}), 400
+    
+    print(vehicles)
+
+    vehicles_json = [v.getJson() for v in vehicles]
+    return vehicles_json
+
+
 @app.route('/getgeocode/<address>', methods=['GET'])
 def get_geocode(address):
     geocode_result = google.get_geocode(address)
