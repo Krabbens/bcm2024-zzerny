@@ -46,7 +46,7 @@ def get_route():
                         }
                     })
 
-@app.route('/getzones', methods=['GET'])
+@app.route('/getzones/<brand>', methods=['GET'])
 def get_zones(brand="tier"):
     zones = router.get_data_zone(cache)
 
@@ -61,7 +61,7 @@ def get_zones(brand="tier"):
     zones_json = [z.getJson() for z in zones_to_return]
     return zones_json
 
-@app.route('/getgeocode', methods=['GET'])
+@app.route('/getgeocode/<address>', methods=['GET'])
 def get_geocode(address):
     return google.get_geocode("Zygmunta Noskowskiego 20 Gdańsk")
 
