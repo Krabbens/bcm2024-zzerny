@@ -108,5 +108,13 @@ def bulk_geocodes():
 
     return jsonify(geocodes)
 
+@app.route('/wholeroute', methods=['POST'])
+def whole_route():
+    data = request.get_json()
+
+    cords = data['addresses']
+
+    return google.get_whole_route(cords)
+
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=6000)
