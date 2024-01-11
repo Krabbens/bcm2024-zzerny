@@ -47,7 +47,7 @@ def get_route():
                         }
                     })
 
-@app.route('/getzones/<brand>/<brand>', methods=['GET'])
+@app.route('/getzones/<brand>', methods=['GET'])
 def get_zones(brand="tier"):
     zones = router.get_data_zone(cache)
 
