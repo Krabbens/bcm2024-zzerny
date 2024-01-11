@@ -1,0 +1,7 @@
+{
+  "name": "bcm",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "vue-vite"
+}
