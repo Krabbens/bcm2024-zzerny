@@ -4,7 +4,7 @@ from zone import *
 
 
 default_location = (54.372158, 18.638306)
-default_radius = 1370
+default_radius = 7000
 
 class Tier:
     def __init__(self):
@@ -77,7 +77,7 @@ class Tier:
             geometry = None
             for geo in all_geometry:
                 if geo["id"] == geo_id:
-                    geometry = [(x, y) for x, y in geo["geometry"]["coordinates"][0]]
+                    geometry = [(y, x) for x, y in geo["geometry"]["coordinates"][0]]
                     break
             type = zone["attributes"]["spec"]
             if geometry != None:

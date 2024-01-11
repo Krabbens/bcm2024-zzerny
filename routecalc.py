@@ -54,6 +54,17 @@ class RouteCalc():
 
         distance = R * c
         return distance
+    
+
+    def turn_parkings_into_stations(self, zones, brand):
+        stations = []
+
+        for zone in zones:
+            if zone.type == "parking":
+                stations.append(Station(zone.location[0], zone.location[1], False, False, False, False, brand))
+
+    
+        return stations
 
 
     def get_data_route(self, cache):
@@ -63,8 +74,11 @@ class RouteCalc():
             self.tier_vehicles = Tier().get_vehicles(init_lat = self.init_lat, init_lon = self.init_lon)
 
             self.mevo_stations = Mevo().get_stations()
-            self.bolt_stations = [] #Tier().get_stations() + Bolt().get_stations()
-            self.tier_stations = []
+
+            self.get_data_zone(cache)
+
+            self.bolt_stations = self.turn_parkings_into_stations(self.bolt_zones, 'bolt')
+            self.tier_stations = self.turn_parkings_into_stations(self.tier_zones, 'tier')
 
             cache.update_route({
                 'mevo_vehicles' : self.mevo_vehicles,
@@ -86,7 +100,7 @@ class RouteCalc():
     def get_data_zone(self, cache):
         if (cache.check_update_zone()):
             self.bolt_zones = Bolt().get_zones()
-            self.tier_zones = [] #Tier().get_zones()
+            self.tier_zones = Tier().get_zones()
 
             cache.update_zone({
                 'bolt_zones' : self.bolt_zones,
@@ -99,30 +113,19 @@ class RouteCalc():
     
 
     def get_data(self, cache):
-        self.snapshot_time()
-
         self.get_data_route(cache)
+
         self.get_data_zone(cache)
 
-        self.snapshot_time()
-
-        point = (54.39898936039211, 18.602469614969234)
-        end_point = (54.40228442462209, 18.59120754980892)
-        point = self.nearest_suitable_point(point, self.bolt_zones, end_point)
-        print(point)
-
-        self.snapshot_time()
+        #point = self.nearest_suitable_point(point, self.bolt_zones, end_point)
+        
 
 
     def nearest_suitable_point(self, location, zones, end_point):
         my_zones = self.check_which_zone(location, zones)
 
-        for zone in my_zones:
-            print(zone)
-
         #select a zone that has a type "no_parking" or "no_go_zone"
         the_zone = self.get_an_illegal_zone(my_zones)
-        print(the_zone)
 
 
         movement_matrix = [(1, 0), (0.707, 0.707), (0, 1), (-0.707, 0.707), (-1, 0), (-0.707, -0.707), (0, -1), (0.707, -0.707)]
@@ -164,7 +167,7 @@ class RouteCalc():
 
     def get_an_illegal_zone(self, zones):
         for zone in zones:
-            if zone.type == "no_parking" or zone.type == "no_go_zone":
+            if zone.type == "no-parking" or zone.type == "no-go":
                 return zone
             
         return None
@@ -231,25 +234,50 @@ class RouteCalc():
         return (dist_pairs[0][0])
     
 
-    def get_route_info(self, type, point1, point2):
-        if (type == 'mevo'):
-            vehicles = self.mevo_vehicles
-            stations = self.mevo_stations
-        elif (type == 'bolt'):
-            vehicles = self.bolt_vehicles
-            stations = self.tier_bolt_stations
-        elif (type == 'tier'):
-            vehicles = self.tier_vehicles
-            stations = self.tier_bolt_stations
+    def get_route_info(self, type, point1, point2, zone = False):
+        if (zone == False):
+            if (type == 'mevo'):
+                vehicles = self.mevo_vehicles
+                stations = self.mevo_stations
+            elif (type == 'bolt'):
+                vehicles = self.bolt_vehicles
+                stations = self.bolt_stations
+            elif (type == 'tier'):
+                vehicles = self.tier_vehicles
+                stations = self.tier_stations
 
-        distances1, distances2 = self.get_distances(vehicles, stations, point1, point2)
+            distances1, distances2 = self.get_distances(vehicles, stations, point1, point2)
 
-        distances1.sort(key=lambda x: x[1])
-        distances2.sort(key=lambda x: x[1])
+            distances1.sort(key=lambda x: x[1])
+            distances2.sort(key=lambda x: x[1])
 
-        v_n = 3
-        s_n = 3
+            v_n = 3
+            s_n = 3
 
-        best = self.validate_with_google(distances1, distances2, v_n, s_n)
+            best = self.validate_with_google(distances1, distances2, v_n, s_n)
 
-        return best
+            return best
+        else:
+            if (type == 'bolt'):
+                vehicles = self.bolt_vehicles
+                zones = self.bolt_zones
+                stations = self.bolt_stations
+            elif (type == 'tier'):
+                vehicles = self.tier_vehicles
+                zones = self.tier_zones
+                stations = self.tier_stations
+
+            distances1, distances2 = self.get_distances(vehicles, stations, point1, point2)
+            distances1.sort(key=lambda x: x[1])
+            v_n = 3
+
+            the_zones = self.check_which_zone(point2, zones)
+            illegal_zone = self.get_an_illegal_zone(the_zones)
+
+            if (illegal_zone == None):
+                #return self.validate_with_google(distances1, [point2], v_n, 1)
+                return (distances1[0][0], point2)
+            else:
+                end_point = self.nearest_suitable_point(point2, zones, point1)
+                #return self.validate_with_google(distances1, [end_point], v_n, 1)
+                return (distances1[0][0], end_point)

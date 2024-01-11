@@ -23,11 +23,15 @@ def get_route():
     if 'point1' not in data or 'point2' not in data or 'type' not in data:
         return jsonify({'error': 'A parameter is missing'}), 400
 
-    start_point = (data['point1']['lon'], data['point1']['lat'])
-    end_point = (data['point2']['lon'], data['point2']['lat'])
+    start_point = (data['point1']['lat'], data['point1']['lon'])
+    end_point = (data['point2']['lat'], data['point2']['lon'])
 
     router.get_data(cache)
-    data = router.get_route_info(data['type'], start_point, end_point)
+
+    if 'zone' in data:
+        data = router.get_route_info(data['type'], start_point, end_point, data['zone'])
+    else:
+        data = router.get_route_info(data['type'], start_point, end_point)
 
     return jsonify({'point1' : 
                         {
@@ -41,7 +45,7 @@ def get_route():
                         }
                     })
 
-@app.zones('/getzones', methods=['GET'])
+@app.route('/getzones', methods=['GET'])
 def get_zones(brand="tier"):
     zones = router.get_data_zone(cache)
 
