@@ -31,6 +31,19 @@ class RouteCalc():
         self.start_time = end_time
         print(f"Execution time: {elapsed_time:.6f} seconds")
 
+    def parkings_last(self, zones):
+        parkings = []
+        rest = []
+        for z in zones:
+            if z.type == "parking":
+                parkings.append(z)
+            else:
+                rest.append(z)
+        rest.extend(parkings)
+        for r in rest:
+            print(z.type)
+        return rest
+
 
     def haversine_distance(self, cords1, cords2):
         lat1 = cords1[0]
@@ -99,8 +112,8 @@ class RouteCalc():
 
     def get_data_zone(self, cache):
         if (cache.check_update_zone()):
-            self.bolt_zones = Bolt().get_zones()
-            self.tier_zones = Tier().get_zones()
+            self.bolt_zones = self.parkings_last(Bolt().get_zones())
+            self.tier_zones = self.parkings_last(Tier().get_zones())
 
             cache.update_zone({
                 'bolt_zones' : self.bolt_zones,
