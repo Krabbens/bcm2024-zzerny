@@ -54,6 +54,19 @@ class RouteCalc():
 
         distance = R * c
         return distance
+    
+
+    def turn_parkings_into_stations(self, zones, brand):
+        stations = []
+
+        for zone in zones:
+            if zone.type == "parking":
+                stations.append(Station(zone.location[0], zone.location[1], False, False, False, False, brand))
+        
+        for station in stations:
+            print(station)
+    
+        return stations
 
 
     def get_data_route(self, cache):
@@ -63,8 +76,11 @@ class RouteCalc():
             self.tier_vehicles = Tier().get_vehicles(init_lat = self.init_lat, init_lon = self.init_lon)
 
             self.mevo_stations = Mevo().get_stations()
-            self.bolt_stations = [] #Tier().get_stations() + Bolt().get_stations()
-            self.tier_stations = []
+
+            self.get_data_zone(cache)
+
+            self.bolt_stations = self.turn_parkings_into_stations(self.bolt_zones, 'bolt')
+            self.tier_stations = self.turn_parkings_into_stations(self.tier_zones, 'tier')
 
             cache.update_route({
                 'mevo_vehicles' : self.mevo_vehicles,
@@ -86,7 +102,7 @@ class RouteCalc():
     def get_data_zone(self, cache):
         if (cache.check_update_zone()):
             self.bolt_zones = Bolt().get_zones()
-            self.tier_zones = [] #Tier().get_zones()
+            self.tier_zones = Tier().get_zones()
 
             cache.update_zone({
                 'bolt_zones' : self.bolt_zones,
@@ -226,10 +242,10 @@ class RouteCalc():
             stations = self.mevo_stations
         elif (type == 'bolt'):
             vehicles = self.bolt_vehicles
-            stations = self.tier_bolt_stations
+            stations = self.bolt_stations
         elif (type == 'tier'):
             vehicles = self.tier_vehicles
-            stations = self.tier_bolt_stations
+            stations = self.tier_stations
 
         distances1, distances2 = self.get_distances(vehicles, stations, point1, point2)
 
