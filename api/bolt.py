@@ -6,6 +6,18 @@ from api.polyline import decode
 
 default_location = (54.372158, 18.638306)
 
+type_mapping = {
+    'preferred_parking': 'parking',
+    'mandatory_parking': 'parking-mode',
+    'no_parking': 'no-parking',
+    'speed_limited': 'reduced-speed',
+    'no_parking_mandatory': 'no-parking',
+    'mandatory_parking_vehicle_count_limited': 'parking-mode',
+    'allowed': 'no-go',
+    'no_parking_speed_limited': 'no-parking',
+    'no_go_zone': 'no-go'
+}
+
 class Bolt:
     def __init__(self):
         self.scooters_url = "https://user.live.boltsvc.net/micromobility/search/getVehicles/v2?language=en&version=CA.97.1&deviceId=8c3e8f25-e1d7-4ea8-81c6-cf80d58eb1f7&device_name=XiaomiM2101K9AG&device_os_version=12&channel=googleplay&deviceType=android&"
@@ -39,7 +51,7 @@ class Bolt:
         area_groups = data["area_groups_by_ids"]
         areas = data["areas"]["added"]
         for a in areas:
-            type = area_groups[a["group_id"]]["style_id"]
+            type = type_mapping[area_groups[a["group_id"]]["style_id"]]
             zone = Zone(type=type,lat=0,lon=0,brand='bolt', geometry=decode(a["polygon"]["locations"]))
             all_zones.append(zone)
         return all_zones
