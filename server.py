@@ -7,11 +7,12 @@ app = Flask(__name__)
 
 cache = None
 router = None
+google = None
 
 
 @app.before_first_request
 def before_first_request():
-    global cache, router
+    global cache, router, google
     cache = Cache()
     router = RouteCalc()
     google = Google()
@@ -63,7 +64,10 @@ def get_zones(brand="tier"):
 
 @app.route('/getgeocode/<address>', methods=['GET'])
 def get_geocode(address):
-    return google.get_geocode("Zygmunta Noskowskiego 20 Gdańsk")
+    geocode_result = google.get_geocode(address)
+    if geocode_result is None:
+        return jsonify({"error": "Geocode not found for the given address"}), 404
+    return jsonify(geocode_result)
 
 
 if __name__ == '__main__':
