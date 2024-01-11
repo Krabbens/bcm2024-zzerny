@@ -108,7 +108,7 @@ def bulk_geocodes():
 
     return jsonify(geocodes)
 
-@app.route('/wholeroute', methods=['POST']):
+@app.route('/wholeroute', methods=['POST'])
 def whole_route():
     data = request.get_json()
 
