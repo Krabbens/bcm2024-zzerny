@@ -14,6 +14,7 @@ def before_first_request():
     global cache, router
     cache = Cache()
     router = RouteCalc()
+    google = Google()
 
 
 @app.route('/getroute', methods=['POST'])
@@ -59,6 +60,10 @@ def get_zones(brand="tier"):
 
     zones_json = [z.getJson() for z in zones_to_return]
     return zones_json
+
+@app.route('/getgeocode', methods=['GET'])
+def get_geocode(address):
+    return google.get_geocode("Zygmunta Noskowskiego 20 Gdańsk")
 
 
 if __name__ == '__main__':
