@@ -70,5 +70,24 @@ def get_geocode(address):
     return jsonify(geocode_result)
 
 
+@app.route('/bulkgeocodes', methods=['POST'])
+def bulk_geocodes():
+    data = request.get_json()
+
+    if 'addresses' not in data:
+        return jsonify({'error': 'A parameter is missing'}), 400
+    
+    adresses = data['addresses']
+
+    geocodes = []
+    
+    for address in adresses:
+        geocode_result = google.get_geocode(address)
+        if geocode_result is None:
+            return jsonify({"error": "Geocode not found for the given address"}), 404
+        geocodes.append(geocode_result)
+
+    return jsonify(geocodes)
+
 if __name__ == '__main__':
     app.run(debug=True)
