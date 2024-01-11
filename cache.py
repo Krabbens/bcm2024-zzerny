@@ -4,7 +4,7 @@ class Cache:
     def __init__(self):
         
         self.route_data = {
-            'update_time' : 30,
+            'update_time' : 60,
             'last_updated' : None,
             'mevo_vehicles' : [],
             'bolt_vehicles' : [],

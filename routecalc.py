@@ -99,30 +99,19 @@ class RouteCalc():
     
 
     def get_data(self, cache):
-        self.snapshot_time()
-
         self.get_data_route(cache)
+
         self.get_data_zone(cache)
 
-        self.snapshot_time()
-
-        point = (54.39898936039211, 18.602469614969234)
-        end_point = (54.40228442462209, 18.59120754980892)
-        point = self.nearest_suitable_point(point, self.bolt_zones, end_point)
-        print(point)
-
-        self.snapshot_time()
+        #point = self.nearest_suitable_point(point, self.bolt_zones, end_point)
+        
 
 
     def nearest_suitable_point(self, location, zones, end_point):
         my_zones = self.check_which_zone(location, zones)
 
-        for zone in my_zones:
-            print(zone)
-
         #select a zone that has a type "no_parking" or "no_go_zone"
         the_zone = self.get_an_illegal_zone(my_zones)
-        print(the_zone)
 
 
         movement_matrix = [(1, 0), (0.707, 0.707), (0, 1), (-0.707, 0.707), (-1, 0), (-0.707, -0.707), (0, -1), (0.707, -0.707)]
@@ -164,7 +153,7 @@ class RouteCalc():
 
     def get_an_illegal_zone(self, zones):
         for zone in zones:
-            if zone.type == "no_parking" or zone.type == "no_go_zone":
+            if zone.type == "no-parking" or zone.type == "no-go":
                 return zone
             
         return None

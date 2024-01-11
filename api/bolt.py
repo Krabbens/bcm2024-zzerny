@@ -13,7 +13,7 @@ type_mapping = {
     'speed_limited': 'reduced-speed',
     'no_parking_mandatory': 'no-parking',
     'mandatory_parking_vehicle_count_limited': 'parking-mode',
-    'allowed': 'no-go',
+    'allowed': 'allowed',
     'no_parking_speed_limited': 'no-parking',
     'no_go_zone': 'no-go'
 }
