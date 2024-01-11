@@ -3,7 +3,6 @@ from station import *
 from api import *
 from math import radians, sin, cos, sqrt, atan2
 import time
-import google
 from geopy.distance import geodesic
 from operator import itemgetter
 
@@ -96,6 +95,7 @@ class RouteCalc():
         else:
             self.bolt_zones = cache.zone_data['bolt_zones']
             self.tier_zones = cache.zone_data['tier_zones']
+        return cache.zone_data
     
 
     def get_data(self, cache):

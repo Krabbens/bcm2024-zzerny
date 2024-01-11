@@ -37,4 +37,4 @@ class Zone:
             "center": self.location
         }
 
-        return json.dumps(zone_json, indent=2)
+        return zone_json
