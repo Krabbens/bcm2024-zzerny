@@ -22,5 +22,6 @@ class Zone:
 
         # Pobieramy środek wielokąta
         middle_point = shapely_polygon.centroid
+        
 
         return (middle_point.x, middle_point.y)

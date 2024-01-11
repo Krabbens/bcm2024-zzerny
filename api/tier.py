@@ -1,5 +1,6 @@
 import requests
 from vehicle import *
+from zone import *
 
 
 default_location = (54.372158, 18.638306)
@@ -40,7 +41,7 @@ class Tier:
         return all_vehicles
 
 
-    def get_zones(self, lat = default_location[0], lon = default_location[1]):
+    def get_zones_json(self, lat = default_location[0], lon = default_location[1]):
         response = requests.get(self.zones_url + "lat=" + str(lat) + "&lng=" + str(lon) + "&radius=100000", headers=self.headers)
         return response.json()
     
@@ -55,5 +56,31 @@ class Tier:
                 poly.append({"lat": point[1], "lng": point[0]})
             new_geo.append({"type": geo["properties"], "coordinates": poly})
 
-        return new_geo
+    def get_geometry(self, root_zone):
+        uri = self.geo_url + root_zone + "/geometry"
+        response = requests.get(uri, headers=self.headers)
+        return response.json()
+    
+    def get_zones(self, lat = default_location[0], lon = default_location[1]):
+        json_obj = self.get_zones_json(lat, lon)
+        all_geometry = []
+
+        #getting unique rootZoneIds
+        root_zones = list(set([i["attributes"]["rootZoneId"] for i in json_obj["data"]]))
+        for ro in root_zones:
+            geometry_json = self.get_geometry(ro)
+            all_geometry.extend(geometry_json["data"]["features"])
+        all_zones = []
+        data = json_obj["data"]
+        for zone in data:
+            geo_id = zone["attributes"]["geometryId"]
+            geometry = None
+            for geo in all_geometry:
+                if geo["id"] == geo_id:
+                    geometry = [(x, y) for x, y in geo["geometry"]["coordinates"][0]]
+                    break
+            type = zone["attributes"]["spec"]
+            if geometry != None:
+                all_zones.append(Zone(geometry, type, 0, 0, brand="tier"))
+        return all_zones
 
