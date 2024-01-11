@@ -3,8 +3,14 @@ import json
 from vehicle import *
 from zone import *
 from api.polyline import decode
+import math
 
 default_location = (54.372158, 18.638306)
+
+big_square = [(54.28015035797154, 18.809524341229256),
+              (54.467733999021526, 18.943420215218467),
+              (54.661743418223715, 18.256384688935576),
+              (54.03241995831043, 18.20967883352075)]
 
 type_mapping = {
     'preferred_parking': 'parking',
@@ -15,8 +21,59 @@ type_mapping = {
     'mandatory_parking_vehicle_count_limited': 'parking-mode',
     'allowed': 'allowed',
     'no_parking_speed_limited': 'no-parking',
-    'no_go_zone': 'no-go'
+    'no_go_zone': 'no-go',
+    'allowed_inverted': 'allowed'
 }
+
+def polacz_listy(tab1, tab2, element1, element2):
+    wynik = []
+    indeks1 = 0
+    indeks2 = 0
+
+
+    while indeks1 < len(tab1) and tab1[indeks1] != element1:
+        wynik.append(tab1[indeks1])
+        indeks1 += 1
+    wynik.append(tab1[indeks1])
+    while indeks2 < len(tab2) and tab2[indeks2] != element2:
+        #wynik.append(tab2[indeks2])
+        indeks2 += 1
+
+    wynik.append(tab2[indeks2])
+    indeks2 += 1
+    if indeks2 >= len(tab2):
+            indeks2 = 0
+
+    while tab2[indeks2] != element2:
+        wynik.append(tab2[indeks2])
+        indeks2 += 1
+        if indeks2 >= len(tab2):
+            indeks2 = 0
+    wynik.append(tab2[indeks2])
+    while indeks1 < len(tab1):
+        wynik.append(tab1[indeks1])
+        indeks1 += 1
+    wynik.append(tab1[0])    
+
+    return wynik
+
+def nearest_points(polygon1, polygon2):
+    min = 9999999999
+    min1 = 0
+    min2 = 0
+    for p1 in polygon1:
+        for p2 in polygon2:
+            dist = math.sqrt((p2[0] - p1[0])**2 + (p2[1] - p1[1])**2)
+            if dist < min:
+                min = dist
+                min1 = p1
+                min2 = p2
+    return min1, min2
+
+
+def combine_polygons(polygon1, polygon2):
+    point1, point2 = nearest_points(polygon1, polygon2)
+    return polacz_listy(polygon1, polygon2, point1, point2)
 
 class Bolt:
     def __init__(self):
@@ -44,6 +101,29 @@ class Bolt:
         response = requests.get(self.zones_url, headers=self.zones_headers)
         return response.json()
     
+    def get_inverted(self):
+        json_obj = self.get_zones_json()
+        all_geometries = []
+        data = json_obj["data"]
+        area_groups = data["inverted_area_groups_by_ids"]
+        areas = data["inverted_areas"]["added"]
+        for a in areas:
+            all_geometries.append(decode(a["polygon"]["locations"]))
+        
+        if(len(all_geometries) > 0):
+            combined = combine_polygons(all_geometries[0], all_geometries[1])
+            i = 2
+            while i < len(all_geometries):
+                combined = combine_polygons(combined, all_geometries[i])
+                i+=1
+        else:
+            combined = all_geometries[0]
+        
+        inverted = combine_polygons(combined, big_square)
+        return Zone(type='allowed_inverted',lat=0,lon=0,brand='bolt', geometry=inverted)
+        
+        
+    
     def get_zones(self):
         json_obj = self.get_zones_json()
         all_zones = []
@@ -54,6 +134,7 @@ class Bolt:
             type = type_mapping[area_groups[a["group_id"]]["style_id"]]
             zone = Zone(type=type,lat=0,lon=0,brand='bolt', geometry=decode(a["polygon"]["locations"]))
             all_zones.append(zone)
+        all_zones.append(self.get_inverted())
         return all_zones
 
     def get_scooters(self, lat = default_location[0], lon = default_location[1]):

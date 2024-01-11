@@ -62,9 +62,7 @@ class RouteCalc():
         for zone in zones:
             if zone.type == "parking":
                 stations.append(Station(zone.location[0], zone.location[1], False, False, False, False, brand))
-        
-        for station in stations:
-            print(station)
+
     
         return stations
 
@@ -236,25 +234,50 @@ class RouteCalc():
         return (dist_pairs[0][0])
     
 
-    def get_route_info(self, type, point1, point2):
-        if (type == 'mevo'):
-            vehicles = self.mevo_vehicles
-            stations = self.mevo_stations
-        elif (type == 'bolt'):
-            vehicles = self.bolt_vehicles
-            stations = self.bolt_stations
-        elif (type == 'tier'):
-            vehicles = self.tier_vehicles
-            stations = self.tier_stations
+    def get_route_info(self, type, point1, point2, zone = False):
+        if (zone == False):
+            if (type == 'mevo'):
+                vehicles = self.mevo_vehicles
+                stations = self.mevo_stations
+            elif (type == 'bolt'):
+                vehicles = self.bolt_vehicles
+                stations = self.bolt_stations
+            elif (type == 'tier'):
+                vehicles = self.tier_vehicles
+                stations = self.tier_stations
 
-        distances1, distances2 = self.get_distances(vehicles, stations, point1, point2)
+            distances1, distances2 = self.get_distances(vehicles, stations, point1, point2)
 
-        distances1.sort(key=lambda x: x[1])
-        distances2.sort(key=lambda x: x[1])
+            distances1.sort(key=lambda x: x[1])
+            distances2.sort(key=lambda x: x[1])
 
-        v_n = 3
-        s_n = 3
+            v_n = 3
+            s_n = 3
 
-        best = self.validate_with_google(distances1, distances2, v_n, s_n)
+            best = self.validate_with_google(distances1, distances2, v_n, s_n)
 
-        return best
+            return best
+        else:
+            if (type == 'bolt'):
+                vehicles = self.bolt_vehicles
+                zones = self.bolt_zones
+                stations = self.bolt_stations
+            elif (type == 'tier'):
+                vehicles = self.tier_vehicles
+                zones = self.tier_zones
+                stations = self.tier_stations
+
+            distances1, distances2 = self.get_distances(vehicles, stations, point1, point2)
+            distances1.sort(key=lambda x: x[1])
+            v_n = 3
+
+            the_zones = self.check_which_zone(point2, zones)
+            illegal_zone = self.get_an_illegal_zone(the_zones)
+
+            if (illegal_zone == None):
+                #return self.validate_with_google(distances1, [point2], v_n, 1)
+                return (distances1[0][0], point2)
+            else:
+                end_point = self.nearest_suitable_point(point2, zones, point1)
+                #return self.validate_with_google(distances1, [end_point], v_n, 1)
+                return (distances1[0][0], end_point)
